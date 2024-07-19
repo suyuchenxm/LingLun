@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "linglun"
+version = "0.1.0"
+description = "Interactive Music Composing Tool"
+authors = ["suri chen <sc4418@columbia.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+musicaiz = "^0.1.2"
+partitura = "^1.3.1"
+python-rtmidi = "^1.5.8"
+
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+notebook = "^6.5.4"
+black = "^23.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
