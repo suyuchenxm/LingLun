@@ -1,0 +1,2 @@
+name: pretrained
+model_dir: 'tokenizer.json'
