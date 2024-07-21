@@ -1,0 +1,12 @@
+name: remi_custom
+params:
+  pitch_range: [21, 109]
+  num_velocities: 32
+  special_tokens: ["PAD", "BOS", "EOS", "MASK"]
+  use_chords: true
+  use_rests: false
+  use_tempos: true
+  use_time_signatures: true
+  use_programs: false
+  num_tempos: 32  # number of tempo bins
+  tempo_range: [40, 250]  # (min, max)
