@@ -1,10 +1,9 @@
-import importlib
 from linglun.data.preprocess import *
 import os
 from pathlib import Path
 from miditok import REMI, TokenizerConfig, MusicTokenizer
-from miditok.pytorch_data import DatasetMIDI, DataCollator
-from torch.utils.data import DataLoader
+# from miditok.pytorch_data import DatasetMIDI, DataCollator
+# from torch.utils.data import DataLoader
 from pathlib import Path
 import hydra
 from omegaconf import DictConfig
@@ -13,6 +12,7 @@ from linglun.exceptions import SCORE_LOADING_EXCEPTION
 from symusic import Score
 import warnings
 from omegaconf import OmegaConf
+import json
 
 
 def train_remi_tokenizer(cfg):
@@ -32,7 +32,7 @@ def train_remi_tokenizer(cfg):
     return tokenizer
 
 
-def tokenizing(cfg, tokenizer, verbose=True):
+def miditok_tokenizing(cfg, tokenizer, verbose=True):
     source_path = Path(cfg.data.datapath)
     save_path = Path(cfg.data.save_path)
     if not os.path.exists(save_path):
@@ -58,33 +58,52 @@ def tokenizing(cfg, tokenizer, verbose=True):
         # save tokenized score
         tokenizer.save_tokens(tokens, out_path)
 
+def musictransformer_tokenizing(cfg):
+    source_path = Path(cfg.data.datapath)
+    save_path = Path(cfg.data.save_path)
+    files_paths = list(Path(source_path).rglob("*.midi"))
+    print(f"Tokenizing {len(files_paths)} music files")
+    desc = f"Tokenizing music files ({'/'.join(list(save_path.parts[-2:]))})"
+    for file_path in tqdm(files_paths, desc=desc):
+        file_path = Path(file_path)
+        try:
+            data = encode_midi(str(file_path))
+        except KeyboardInterrupt:
+            print('Aborted')
+            return 
+        except SCORE_LOADING_EXCEPTION as e: 
+            print("Error loading score: ", file_path)
+        
+        out_path = save_path / f"{file_path.stem}.json"
+        with open(out_path, 'w') as f:
+            json.dump(data, f)
+
 @hydra.main(config_path="conf/", config_name="config.yaml", version_base='1.2')
 def run_tokenizer(cfg: DictConfig):
     tokenizer_type = cfg.tokenizer.name
-    save_path = cfg.data.save_path
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    os.makedirs(cfg.data.save_path, exist_ok=True)
 
     if tokenizer_type == 'music_transformer':
-        pass
+        musictransformer_tokenizing(cfg)
+        print("dataset tokenized")
     elif tokenizer_type == "remi_default":
         cfg_dict = OmegaConf.to_container(cfg, resolve=True)
         REMI_TOKENIZER_CONFIG = TokenizerConfig(**cfg_dict)
         tokenizer = REMI(REMI_TOKENIZER_CONFIG)
         print("Using default REMI tokenizer")
-        tokenizing(cfg, tokenizer)
+        miditok_tokenizing(cfg, tokenizer)
         print("dataset tokenized")
     elif tokenizer_type == "remi_custom":
         print("Training REMI tokenizer")
         print(cfg.tokenizer.name)
         tokenizer = train_remi_tokenizer(cfg)
-        tokenizing(cfg, tokenizer)
+        miditok_tokenizing(cfg, tokenizer)
         print("dataset tokenized")
     elif tokenizer_type == "pretrained":
         model_dir = cfg.tokenizer.model_dir
         print(f"Using pretrained tokenizer {model_dir}")
         tokenizer = MusicTokenizer.from_pretrained(model_dir)
-        tokenizing(cfg, tokenizer)
+        miditok_tokenizing(cfg, tokenizer)
         print("dataset tokenized")
     else:
         raise ValueError(f"Tokenizer {tokenizer} not found")
