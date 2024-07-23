@@ -1,5 +1,5 @@
 import importlib
-from linglun.data.preprocess import *
+from linglun.data.midi_parser import *
 import os
 from pathlib import Path
 from miditok import REMI, TokenizerConfig
@@ -12,9 +12,7 @@ from omegaconf import DictConfig
 
 def train_remi_tokenizer(cfg):
     # train REMI tokenizer with BPE
-    REMI_TOKENIZER_CONFIG = TokenizerConfig(
-        **cfg.tokenizer
-    )
+    REMI_TOKENIZER_CONFIG = TokenizerConfig(**cfg.tokenizer)
     tokenizer = REMI(REMI_TOKENIZER_CONFIG)
     midi_paths = list(Path(cfg.data.datapath).rglob("*.mid"))
     print(f"Training REMI tokenizer with {len(midi_paths)} midi files")
@@ -33,7 +31,7 @@ def run_tokenizer(cfg: DictConfig, tokenizer="REMI"):
     save_path = cfg.data.save_path
     pretrained_model = cfg.data.pretrained_model
 
-    if tokenizer == 'music_transformer':
+    if tokenizer == "music_transformer":
         pass
     elif tokenizer == "REMI":
         print("Training REMI tokenizer")
@@ -46,6 +44,6 @@ def run_tokenizer(cfg: DictConfig, tokenizer="REMI"):
     else:
         raise ValueError(f"Tokenizer {tokenizer} not found")
 
+
 if __name__ == "__main__":
     run_tokenizer()
-    
