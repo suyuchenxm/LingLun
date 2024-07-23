@@ -1,0 +1,3 @@
+seq_len: 2048
+d_model: 512
+n_heads: 8

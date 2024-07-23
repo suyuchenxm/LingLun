@@ -1,0 +1,8 @@
+name: music_transformer
+vocab_size: 388 + 1
+pad_id: 0
+RANGE_NOTE_ON: 128
+RANGE_NOTE_OFF: 128
+RANGE_VEL: 32
+RANGE_TIME_SHIFT: 100
+

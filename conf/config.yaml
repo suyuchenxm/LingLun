@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - tokenizer: remi_default
-  # - model: "music_transfomer_default"
+  - model: default
 
 data:
   datapath: data
@@ -11,3 +11,4 @@ model_dir: model
 log_dir: log
 predict_dir: predict
 vocab_size: 4096
+pad_id: 0
