@@ -31,14 +31,14 @@ def relative_scaled_dot_product_attention(Q, K, V, Srel, mask=None):
     Returns:
         output (torch.Tensor): output, [batch_size, num_head, seq_len, d_k]
     """
-    d_k = Q.size(-1)
+    d_h = Q.size(-1)
     QKt = torch.matmul(Q, K.transpose(-2, -1))
-    scores =  (QKt + Srel) / math.sqrt(d_k) # [batch_size, num_head, seq_len, seq_len]
+    scores =  (QKt + Srel) / math.sqrt(d_h) # [batch_size, num_head, seq_len, seq_len]
     if mask is not None:
         scores = scores + mask.masked_fill(mask == 1, float('-inf'))
 
     attention = F.softmax(scores, dim=-1) # [batch_size, num_head, seq_len, seq_len]
-    output = torch.matmul(attention, V) # [batch_size, num_head, seq_len, d_k]
+    output = torch.matmul(attention, V) # [batch_size, num_head, seq_len, d_h]
     return output
 
 def skew(qet):
